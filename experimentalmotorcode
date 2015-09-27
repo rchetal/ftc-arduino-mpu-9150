@@ -1,3 +1,8 @@
+//#include <helper_3dmath.h>
+//#include <MPU6050.h>
+//#include <MPU6050_6Axis_MotionApps20.h>
+//#include <MPU6050_9Axis_MotionApps41.h>
+
 #include <I2Cdev.h>
 
 // I2C device class (I2Cdev) demonstration Arduino sketch for MPU6050 class using DMP (MotionApps v2.0)
@@ -136,7 +141,7 @@ float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
 // packet structure for InvenSense teapot demo
-//u+int8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
+uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
 
 
 
@@ -156,6 +161,10 @@ void dmpDataReady() {
 // ================================================================
 
 void setup() {
+    //Setup Channel A
+    pinMode(12, OUTPUT); //Initiates Motor Channel A pin
+    //pinMode(9, OUTPUT); //Initiates Brake Channel A pin
+  
     // join I2C bus (I2Cdev library doesn't do this automatically)
     Wire.begin();
 
@@ -194,7 +203,6 @@ void setup() {
         // turn on the DMP, now that it's ready
         Serial.println(F("Enabling DMP..."));
         mpu.setDMPEnabled(true);
-         
 
         // enable Arduino interrupt detection
         Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
@@ -219,8 +227,6 @@ void setup() {
 
     // configure LED for output
     pinMode(LED_PIN, OUTPUT);
-    
-    pinMode(9, OUTPUT); //Initiates Brake Channel A pin
 }
 
 
@@ -358,17 +364,24 @@ void loop() {
         digitalWrite(LED_PIN, blinkState);
         
         if(int(euler[1] * 180/M_PI) < 0){
-          digitalWrite(9, LOW);   //Disengage the Brake for Channel A
+            digitalWrite(9, LOW);   //Disengage the Brake for Channel A
             while((euler[1] * 180/M_PI) < 0){
-                analogWrite(12, HIGH);   //Spins the motor on Channel A at full speed        
+                //digitalWrite(9, LOW);   //Disengage the Brake for Channel A
+                analogWrite(12, LOW);   //Spins the motor on Channel A at full speed
+                analogWrite(3, 255);   //Spins the motor on Channel A at full speed
+                //delay(1000);        
             }
-            digitalWrite(9, HIGH);   //Disengage the Brake for Channel A
+            //digitalWrite(9, HIGH);   //Disengage the Brake for Channel A
         }
         if(int(euler[1] * 180/M_PI) > 0){
             digitalWrite(9, LOW);   //Disengage the Brake for Channel A
             while((euler[1] * 180/M_PI) < 0){
-                
-                analogWrite(12, LOW);   //Spins the motor on Channel A at full speed        
+                //digitalWrite(9, LOW);   //Disengage the Brake for Channel A
+                analogWrite(12, HIGH);   //Spins the motor on Channel A at full speed
+                analogWrite(3, 255);   //Spins the motor on Channel A at full speed
+                //delay(1000);        
             }
-            digitalWrite(9, HIGH);   //Disengage the Brake for Channel A
+            //digitalWrite(9, HIGH);   //Disengage the Brake for Channel A
         }
+    }
+}
